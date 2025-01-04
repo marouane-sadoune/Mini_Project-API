@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+{% block title %}Créer un produit{% endblock %}
+{% block body %}
+    <h1>Créer un produit</h1>
+    <form method="POST">
+        <label for="name">Nom :</label>
+        <input type="text" id="name" name="name" required>
+        <label for="price">Prix :</label>
+        <input type="number" id="price" name="price" step="0.01" required>
+        <button type="submit">Créer</button>
+    </form>
+{% endblock %}
