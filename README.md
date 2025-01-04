@@ -1,117 +1,139 @@
 # Mini_Project-API
 
 
-This documentation explains how to set up, test, and publish a Product API using Postman and GitHub.
+Cette API Produit est construite avec Symfony et permet de gérer des produits dans une base de données. Elle fournit des points de terminaison pour créer, lire, mettre à jour et supprimer des produits.
 
 ---
 
-## Step 1: Configure Postman
+## Fonctionnalités
 
-### 1. Create a Collection
-1. Open **Postman**.
-2. Click on **New** > **Collection**.
-3. Name the collection, e.g., **Product API**.
+   - Lister tous les produits.
+   - Ajouter de nouveaux produits
+   - Mettre à jour des produits existants
+   - Supprimer des produits
 
-### 2. Configure API Requests
+---
 
-#### GET /api/products
-1. Click on **New Request**.
-2. Select the method **GET**.
-3. Enter the URL of your local API, e.g., `http://127.0.0.1:8000/api/products`.
-4. Save the request in the **Product API** collection.
+## Installation
 
-#### POST /api/products
-1. Create a new request with the method **POST**.
-2. URL: `http://127.0.0.1:8000/api/products`.
-3. Go to the **Body** tab, select **raw**, and choose **JSON**.
-4. Add the following sample payload:
-   ```json
-   {
-       "name": "Produit A",
-       "price": 10.0
-   }
+Suivez ces étapes pour configurer le projet sur votre machine locale :
+1. Clonez le dépôt :
+   ```bash
+   git clone https://github.com/marouane-sadoune/Mini_Project-API.git
    ```
-5. Save the request in the **Product API** collection.
-
-#### PUT /api/products/{id}
-1. Create a new request with the method **PUT**.
-2. URL: `http://127.0.0.1:8000/api/products/1`.
-3. Go to the **Body** tab, select **raw**, and choose **JSON**.
-4. Add the following sample payload:
-   ```json
-   {
-       "name": "Produit A Modifié",
-       "price": 15.5
-   }
+2. Naviguez dans le répertoire du projet :
+   ```bash
+   cd Mini_Project-API
    ```
-5. Save the request in the **Product API** collection.
+3. Installez les dépendances avec Composer :
+   ```bash
+   Copy code
+   composer install
+   ```
+4. Configurez la base de donnee :
+   ```powershell/cmd
+   php bin/console doctrine:database:create
+   php bin/console doctrine:migrations:migrate
+   ```
+5. Demarer le serveur :
+   ```powershell/cmd
+   symfony server:start
+   ```
+6. Accédez à l'API via votre navigateur ou Postman :
+   ```bash
+   http://127.0.0.1:8000/api
+   ```
+---
 
+## Points de terminaison de l'API
+
+### Lister tous les produits:
+#### GET `/api/products`:
+**Réponse :**
+   ```json
+[
+    {
+        "id": 1,
+        "name": "Produit A",
+        "price": 10.0
+    },
+    {
+        "id": 2,
+        "name": "Produit B",
+        "price": 15.0
+    }
+]
+
+   ```
+### Mettre à jour un produit
+#### PUT `/api/products/{id}`
+
+#### Corps de la requête :
+
+```json
+{
+    "name": "Produit C Modifié",
+    "price": 25.0
+}
+```
+**Réponse :**
+
+```json
+{
+    "id": 3,
+    "name": "Produit C Modifié",
+    "price": 25.0
+}
+```
+### Supprimer un produit
 #### DELETE /api/products/{id}
-1. Create a new request with the method **DELETE**.
-2. URL: `http://127.0.0.1:8000/api/products/1`.
-3. Save the request in the **Product API** collection.
 
+**Réponse :**
+
+```json
+{
+    "message": "Produit supprimé avec succès"
+}
+```
 ---
+### Tester l'API
+ - Vous pouvez tester les points de terminaison de l'API avec Postman ou cURL.
 
-## Step 2: Execute and Validate Requests
+### Postman :
+   1.Ouvrez Postman.
+   2.Importez la collection fournie dans le fichier postman_collection.json.
+   3.Exécutez les requêtes et vérifiez les réponses.
+### Avec cURL :
+   -Exemple de commande pour tester le point de terminaison GET /api/products :
 
-1. Launch each request in the **Product API** collection:
-   - **GET**: Ensure it returns a list of products.
-   - **POST**: Verify that it adds a new product.
-   - **PUT**: Confirm that it updates an existing product.
-   - **DELETE**: Validate that it deletes the specified product.
+```bash
+curl -X GET http://127.0.0.1:8000/api/products
+```
+**Contribution**
+Les contributions sont les bienvenues ! Suivez ces étapes pour contribuer :
 
-2. Check the responses and ensure the API behaves as expected.
-
----
-
-## Step 3: Generate a Report
-
-1. Open the **Product API** collection in Postman.
-2. Click on the **Run** button (Collection Runner).
-3. Execute all requests in the collection.
-4. Export the results:
-   - Choose to export as **JSON** or **HTML** for documentation purposes.
-
----
-
-## Step 4: Publish the Project on GitHub
-
-### 1. Initialize Git
-1. Open a terminal in your project directory.
-2. Run the following commands:
+   1.Forkez le dépôt.
+   2.Créez une nouvelle branche pour votre fonctionnalité :
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
+git checkout -b feature/votre-fonctionnalite
    ```
+Validez vos modifications :
 
-### 2. Create a New GitHub Repository
-1. Go to [GitHub](https://github.com/).
-2. Click on **New** to create a repository.
-3. Name your repository, e.g., `product-api`.
-4. Follow the instructions to connect your local repository to GitHub:
    ```bash
-   git remote add origin https://github.com/username/product-api.git
-   git branch -M main
-   git push -u origin main
+git commit -m "Ajoutez votre message ici"
    ```
+Poussez votre branche :
+```bash
+git push origin feature/votre-fonctionnalite
+```
+Ouvrez une Pull Request sur GitHub.
 
 ---
 
-## README Checklist
-
-1. **Setup Instructions**:
-   - Include steps to clone the repository, install dependencies, and run the server.
-2. **API Endpoints**:
-   - Document all API endpoints with example requests and responses.
-3. **Testing**:
-   - Explain how to use Postman to test the API.
-4. **Contribution Guidelines**:
-   - Add instructions for contributing to the project.
+##Licence
+Ce projet est sous licence MIT. Consultez le fichier LICENSE pour plus de détails.
 
 ---
 
-This concludes the documentation for setting up and testing the Product API project.
-
+Dites-moi si vous souhaitez que cette version soit mise à jour dans votre document en cours ! 😊
 
