@@ -3,7 +3,7 @@
 
 Cette API Produit est construite avec Symfony et permet de gérer des produits dans une base de données. Elle fournit des points de terminaison pour créer, lire, mettre à jour et supprimer des produits.
 
----
+
 
 ## Fonctionnalités
 
@@ -12,7 +12,7 @@ Cette API Produit est construite avec Symfony et permet de gérer des produits d
    - Mettre à jour des produits existants
    - Supprimer des produits
 
----
+
 
 ## Installation
 
@@ -134,7 +134,7 @@ Ouvrez une Pull Request sur GitHub.
 
 Ce projet est sous licence MIT. Consultez le fichier LICENSE pour plus de détails.
 
----
+
 
 Dites-moi si vous souhaitez que cette version soit mise à jour dans votre document en cours ! 😊
 
