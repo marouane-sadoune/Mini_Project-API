@@ -97,6 +97,6 @@ class ProductController extends AbstractController
     $productRepository->save($product, true);
     return $this->redirectToRoute('products');
     }
-    return $this->render('products/edit.html.twig', ['product' => $product]);
+    return $this->render('products/Edit.html.twig', ['product' => $product]);
     }
 }
