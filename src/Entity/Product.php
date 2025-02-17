@@ -12,6 +12,7 @@ class Product
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+    // private
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
