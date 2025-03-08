@@ -3,88 +3,96 @@
 namespace App\Controller;
 
 use App\Entity\Product;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-// use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ApiController extends AbstractController
 {
+    private $entityManager;
+    private $validator;
+    private $serializer;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator,
+        SerializerInterface $serializer
+    ) {
+        $this->entityManager = $entityManager;
+        $this->validator = $validator;
+        $this->serializer = $serializer;
+    }
+
     #[Route('/api/products', name: 'api_products', methods: ['GET'])]
     public function getProducts(ProductRepository $productRepository): JsonResponse
     {
         $products = $productRepository->findAll();
-        $data = [];
-    foreach ($products as $product) {
-        $data[] = [
-                    'id' => $product->getId(),
-                    'name' => $product->getName(),
-                    'price' => $product->getPrice(),
-                ];
+        $data = $this->serializer->serialize($products, 'json', ['groups' => 'product']);
+        return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
-    return new JsonResponse($data);
-    }
+
     #[Route('/api/products', name: 'api_create_product', methods: ['POST'])]
-    public function createProduct(Request $request, ProductRepository $productRepository): JsonResponse
+    public function createProduct(Request $request): JsonResponse
     {
-        // Decode the JSON request content
         $data = json_decode($request->getContent(), true);
 
-        // Check if the necessary fields are present in the request
-        if (empty($data['name']) || empty($data['price'])) {
-            // If missing fields, return an error response
-            return new JsonResponse(['error' => 'Invalid data'], JsonResponse::HTTP_BAD_REQUEST);
+        $product = new Product();
+        $product->setName($data['name'] ?? '');
+        $product->setPrice((float)($data['price'] ?? 0));
+
+        $errors = $this->validator->validate($product);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        // Create a new Product entity
-        $product = new Product();
-        $product->setName($data['name']);
-        $product->setPrice((float)$data['price']);
+        $this->entityManager->persist($product);
+        $this->entityManager->flush();
 
-        // Persist the new product to the database
-        $productRepository->save($product, true);
-
-        // Return a success response with HTTP status 201 (Created)
         return new JsonResponse(['status' => 'Product created'], JsonResponse::HTTP_CREATED);
     }
-
 
     #[Route('/api/products/{id}', name: 'api_update_product', methods: ['PUT'])]
     public function updateProduct(int $id, Request $request, ProductRepository $productRepository): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
         $product = $productRepository->find($id);
-
         if (!$product) {
-            return new JsonResponse(['error' => 'Product not found'], JsonResponse::HTTP_NOT_FOUND);
+            throw new NotFoundHttpException('Product not found');
         }
 
+        $data = json_decode($request->getContent(), true);
         if (!empty($data['name'])) {
             $product->setName($data['name']);
         }
-
         if (!empty($data['price'])) {
             $product->setPrice((float)$data['price']);
         }
 
-        $productRepository->save($product, true);
+        $this->entityManager->flush();
 
         return new JsonResponse(['status' => 'Product updated']);
     }
 
-
     #[Route('/api/products/{id}', name: 'api_delete_product', methods: ['DELETE'])]
-    public function deleteProduct(int $id, ProductRepository $productRepository):JsonResponse
+    public function deleteProduct(int $id, ProductRepository $productRepository): JsonResponse
     {
         $product = $productRepository->find($id);
         if (!$product) {
-            return new JsonResponse(['error' => 'Product not fo und'],JsonResponse::HTTP_NOT_FOUND);
+            throw new NotFoundHttpException('Product not found');
         }
-        $productRepository->remove($product, true);
+
+        $this->entityManager->remove($product);
+        $this->entityManager->flush();
+
         return new JsonResponse(['status' => 'Product deleted']);
     }
 }
