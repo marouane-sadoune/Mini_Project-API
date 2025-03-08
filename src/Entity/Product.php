@@ -17,7 +17,7 @@ class Product
     #[Doctrine\ORM\Mapping\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column]
+    #[Doctrine\ORM\Mapping\Column]
     private ?float $price = null;
 
     public function getId(): ?int
