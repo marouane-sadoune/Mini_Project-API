@@ -8,13 +8,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[Doctrine\ORM\Mapping\Id]
+    #[Doctrine\ORM\Mapping\GeneratedValue]
+    #[Doctrine\ORM\Mapping\Column]
     private ?int $id = null;
     // private
 
-    #[ORM\Column(length: 255)]
+    #[Doctrine\ORM\Mapping\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\Column]
