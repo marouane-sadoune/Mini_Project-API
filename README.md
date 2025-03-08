@@ -16,7 +16,7 @@ Cette API Produit est construite avec Symfony et permet de gérer des produits d
 
 ## Installation
 
-Suivez ces étapes pour configurer le projet sur votre machine locale :
+### Suivez ces étapes pour configurer le projet sur votre machine locale :
 1. Clonez le dépôt :
    ```bash
    git clone https://github.com/marouane-sadoune/Mini_Project-API.git
