@@ -27,7 +27,7 @@ class AppFixtures extends Fixture
             $product->setPrice(mt_rand(10, 100));
             $product->setDescription('Description for product ' . $i);
 
-            // Assign a random category to the product
+            
             $product->setCategory($categories[array_rand($categories)]);
 
             $manager->persist($product);
