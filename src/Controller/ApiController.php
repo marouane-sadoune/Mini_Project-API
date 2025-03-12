@@ -95,4 +95,33 @@ class ApiController extends AbstractController
 
         return new JsonResponse(['status' => 'Product deleted']);
     }
+    #[Route('/api/products/{id}', name: 'api_update_product', methods: ['PUT'])]
+public function updateProduct(int $id, Request $request, ProductRepository $productRepository): JsonResponse
+{
+    $product = $productRepository->find($id);
+    if (!$product) {
+        throw new NotFoundHttpException('Product not found');
+    }
+
+    $data = json_decode($request->getContent(), true);
+    if (!empty($data['name'])) {
+        $product->setName($data['name']);
+    }
+    if (!empty($data['price'])) {
+        $product->setPrice((float)$data['price']);
+    }
+
+    $errors = $this->validator->validate($product);
+    if (count($errors) > 0) {
+        $errorMessages = [];
+        foreach ($errors as $error) {
+            $errorMessages[] = $error->getMessage();
+        }
+        return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
+    }
+
+    $this->entityManager->flush();
+
+    return new JsonResponse(['status' => 'Product updated']);
+}
 }
