@@ -30,11 +30,23 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/products', name: 'api_products', methods: ['GET'])]
-    public function getProducts(ProductRepository $productRepository): JsonResponse
+    public function getProducts(Request $request, ProductRepository $productRepository): JsonResponse
     {
-        $products = $productRepository->findAll();
-        $data = $this->serializer->serialize($products, 'json', ['groups' => 'product']);
-        return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
+        $page = $request->query->getInt('page', 1);
+        $limit = $request->query->getInt('limit', 10);
+
+        $paginator = $productRepository->findAllPaginated($page, $limit);
+        $data = $this->serializer->serialize($paginator->getItems(), 'json', ['groups' => 'product']);
+
+        return new JsonResponse([
+            'status' => 'success',
+            'data' => json_decode($data, true),
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $paginator->count()
+            ]
+        ], JsonResponse::HTTP_OK);
     }
 
     #[Route('/api/products', name: 'api_create_product', methods: ['POST'])]
@@ -52,13 +64,13 @@ class ApiController extends AbstractController
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
             }
-            return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
+            return new JsonResponse(['status' => 'error', 'errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
         }
 
         $this->entityManager->persist($product);
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'Product created'], JsonResponse::HTTP_CREATED);
+        return new JsonResponse(['status' => 'success', 'message' => 'Product created'], JsonResponse::HTTP_CREATED);
     }
 
     #[Route('/api/products/{id}', name: 'api_update_product', methods: ['PUT'])]
@@ -77,9 +89,18 @@ class ApiController extends AbstractController
             $product->setPrice((float)$data['price']);
         }
 
+        $errors = $this->validator->validate($product);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return new JsonResponse(['status' => 'error', 'errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'Product updated']);
+        return new JsonResponse(['status' => 'success', 'message' => 'Product updated']);
     }
 
     #[Route('/api/products/{id}', name: 'api_delete_product', methods: ['DELETE'])]
@@ -93,35 +114,6 @@ class ApiController extends AbstractController
         $this->entityManager->remove($product);
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'Product deleted']);
+        return new JsonResponse(['status' => 'success', 'message' => 'Product deleted']);
     }
-    #[Route('/api/products/{id}', name: 'api_update_product', methods: ['PUT'])]
-public function updateProduct(int $id, Request $request, ProductRepository $productRepository): JsonResponse
-{
-    $product = $productRepository->find($id);
-    if (!$product) {
-        throw new NotFoundHttpException('Product not found');
-    }
-
-    $data = json_decode($request->getContent(), true);
-    if (!empty($data['name'])) {
-        $product->setName($data['name']);
-    }
-    if (!empty($data['price'])) {
-        $product->setPrice((float)$data['price']);
-    }
-
-    $errors = $this->validator->validate($product);
-    if (count($errors) > 0) {
-        $errorMessages = [];
-        foreach ($errors as $error) {
-            $errorMessages[] = $error->getMessage();
-        }
-        return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
-    }
-
-    $this->entityManager->flush();
-
-    return new JsonResponse(['status' => 'Product updated']);
-}
 }
